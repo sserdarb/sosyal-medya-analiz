@@ -1,0 +1,563 @@
+<div class="relative min-h-screen w-full flex-col bg-background-dark font-display text-gray-200">
+
+  @if (isLoading()) {
+    <div class="fixed inset-0 bg-black/70 z-50 flex flex-col items-center justify-center animate-fade-in">
+        <app-loading-spinner class="text-primary"></app-loading-spinner>
+        <p class="mt-4 text-gray-300">{{ loadingMessage() }}</p>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="fixed bottom-5 right-5 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg animate-fade-in-up z-50">
+        {{ errorMessage() }}
+    </div>
+  }
+
+  @switch (step()) {
+    @case ('splash') {
+      <div class="flex h-screen w-full flex-col items-center justify-center text-center splash-animation">
+        <span class="material-symbols-outlined text-7xl text-primary">auto_awesome</span>
+        <h1 class="mt-4 text-4xl font-bold text-white">{{ translations().splash.title }}</h1>
+        <p class="mt-2 text-lg text-gray-400">{{ translations().splash.tagline }}</p>
+      </div>
+    }
+    @case ('analysis') {
+      <div class="flex min-h-screen w-full items-center justify-center bg-gray-900 p-4 animate-fade-in">
+        <div class="w-full max-w-xl rounded-2xl bg-background-dark p-8 shadow-2xl shadow-primary/10 border border-white/10">
+          <div class="text-center">
+            <span class="material-symbols-outlined text-5xl text-primary">query_stats</span>
+            <h2 class="mt-4 text-3xl font-bold tracking-tight text-white">{{ translations().analysis.title }}</h2>
+            <p class="mt-2 text-gray-400">{{ translations().analysis.subtitle }}</p>
+          </div>
+    
+          <form [formGroup]="analysisForm" (ngSubmit)="startAnalysis()" class="mt-8 space-y-6">
+            <div>
+              <label for="instagram-handle" class="block text-sm font-medium text-gray-300">{{ translations().analysis.instagramLabel }}</label>
+              <div class="relative mt-1">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">@</span>
+                <input type="text" id="instagram-handle" formControlName="instagramHandle"
+                       class="block w-full rounded-md border-gray-600 bg-gray-800 py-3 pl-10 pr-4 text-white shadow-sm focus:border-primary focus:ring-primary"
+                       [placeholder]="translations().analysis.instagramPlaceholder">
+              </div>
+            </div>
+    
+            <div>
+              <label for="website-url" class="block text-sm font-medium text-gray-300">{{ translations().analysis.websiteLabel }}</label>
+              <input type="url" id="website-url" formControlName="websiteUrl"
+                     class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-3 px-4 text-white shadow-sm focus:border-primary focus:ring-primary"
+                     [placeholder]="translations().analysis.websitePlaceholder">
+            </div>
+    
+            <div class="flex flex-col gap-4 pt-4">
+              <button type="submit"
+                      class="flex w-full justify-center rounded-md border border-transparent bg-primary py-3 px-4 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-dark transition-colors duration-200">
+                {{ translations().analysis.startButton }}
+              </button>
+              <button type="button" (click)="skipAnalysis()"
+                      class="flex w-full justify-center rounded-md border border-gray-600 py-3 px-4 text-sm font-medium text-gray-300 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-background-dark transition-colors duration-200">
+                {{ translations().analysis.skipButton }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+    @case ('onboarding') {
+      <div class="flex min-h-screen w-full items-center justify-center bg-gray-900 p-4 animate-fade-in">
+        <div class="w-full max-w-4xl rounded-2xl bg-background-dark shadow-2xl shadow-primary/10 border border-white/10">
+          <div class="p-8">
+            <div class="text-center">
+                <p class="text-base font-semibold text-primary">{{ translations().onboarding.step }} 1 / 1</p>
+                <h2 class="mt-2 text-3xl font-bold tracking-tight text-white">{{ translations().onboarding.title }}</h2>
+                <p class="mt-2 text-gray-400">{{ translations().onboarding.subtitle }}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-px bg-white/10">
+            <div class="p-8 bg-background-dark">
+                <h3 class="font-semibold text-white">{{ translations().onboarding.reportTitle }}</h3>
+                @if (accountReport()) {
+                    <div class="prose prose-invert mt-4 text-gray-300 max-w-none [&_h3]:text-white [&_ul]:pl-5" [innerHTML]="accountReport()"></div>
+                } @else {
+                    <p class="mt-4 text-gray-400">{{ translations().onboarding.noReport }}</p>
+                }
+            </div>
+            <div class="p-8 bg-gray-900">
+                <form [formGroup]="businessInfoForm" (ngSubmit)="finishOnboarding()" class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-300">{{ translations().onboarding.nameLabel }}</label>
+                        <input type="text" id="name" formControlName="name" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-2 px-3 text-white focus:border-primary focus:ring-primary" [placeholder]="translations().onboarding.namePlaceholder">
+                    </div>
+                    <div>
+                        <label for="industry" class="block text-sm font-medium text-gray-300">{{ translations().onboarding.industryLabel }}</label>
+                        <input type="text" id="industry" formControlName="industry" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-2 px-3 text-white focus:border-primary focus:ring-primary" [placeholder]="translations().onboarding.industryPlaceholder">
+                    </div>
+                    <div>
+                        <label for="targetAudience" class="block text-sm font-medium text-gray-300">{{ translations().onboarding.targetAudienceLabel }}</label>
+                        <textarea id="targetAudience" formControlName="targetAudience" rows="2" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-2 px-3 text-white focus:border-primary focus:ring-primary" [placeholder]="translations().onboarding.targetAudiencePlaceholder"></textarea>
+                    </div>
+                     <div>
+                        <label for="products" class="block text-sm font-medium text-gray-300">{{ translations().onboarding.productsLabel }}</label>
+                        <input type="text" id="products" formControlName="products" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-2 px-3 text-white focus:border-primary focus:ring-primary" [placeholder]="translations().onboarding.productsPlaceholder">
+                    </div>
+                     <div>
+                        <label for="usp" class="block text-sm font-medium text-gray-300">{{ translations().onboarding.uspLabel }}</label>
+                        <input type="text" id="usp" formControlName="usp" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-2 px-3 text-white focus:border-primary focus:ring-primary" [placeholder]="translations().onboarding.uspPlaceholder">
+                    </div>
+                    <div>
+                        <label for="tone" class="block text-sm font-medium text-gray-300">{{ translations().onboarding.toneLabel }}</label>
+                        <select id="tone" formControlName="tone" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-2 pl-3 pr-10 text-white focus:border-primary focus:ring-primary">
+                            <option value="" disabled>{{ translations().onboarding.tonePlaceholder }}</option>
+                            @for (tone of translations().communicationTones; track tone) {
+                                <option [value]="tone">{{ tone }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="pt-4">
+                         <button type="submit" [disabled]="businessInfoForm.invalid" class="flex w-full justify-center rounded-md border border-transparent bg-primary py-3 px-4 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-dark transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                            {{ translations().onboarding.finishButton }}
+                         </button>
+                    </div>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+    @case('app') {
+      <div class="flex flex-col h-screen w-full animate-fade-in">
+        <!-- Header -->
+        <header class="flex-shrink-0 bg-gray-900 px-6 py-3 flex items-center justify-between border-b border-white/10">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-3xl text-primary">auto_awesome</span>
+            <span class="text-xl font-bold text-white">{{ businessName() }}</span>
+          </div>
+          <nav class="flex items-center gap-2">
+            @for(tab of [
+              {id: 'planner', icon: 'edit_calendar', label: translations().tabs.planner},
+              {id: 'reports', icon: 'bar_chart', label: translations().tabs.reports}
+            ]; track tab.id) {
+              <div class="relative group">
+                <button (click)="activeTab.set(tab.id)" class="p-2.5 rounded-md transition-colors" [class.bg-primary/20]="activeTab() === tab.id" [class.text-primary]="activeTab() === tab.id" [class.text-gray-400]="activeTab() !== tab.id" [class.hover:bg-gray-800]="activeTab() !== tab.id" [class.hover:text-gray-200]="activeTab() !== tab.id">
+                  <span class="material-symbols-outlined text-xl">{{tab.icon}}</span>
+                </button>
+                <div class="absolute top-full mt-2 -translate-x-1/2 left-1/2 bg-gray-700 text-white text-xs font-semibold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                  {{tab.label}}
+                </div>
+              </div>
+            }
+            <div class="w-px h-6 bg-white/10 mx-2"></div> <!-- separator -->
+             <div class="relative group">
+                <button (click)="activeTab.set('settings')" class="p-2.5 rounded-full transition-colors" [class.bg-primary/20]="activeTab() === 'settings'" [class.text-primary]="activeTab() === 'settings'" [class.text-gray-400]="activeTab() !== 'settings'" [class.hover:bg-gray-800]="activeTab() !== 'settings'" [class.hover:text-gray-200]="activeTab() !== 'settings'">
+                  <span class="material-symbols-outlined text-xl">settings</span>
+                </button>
+                 <div class="absolute top-full mt-2 -translate-x-1/2 left-1/2 bg-gray-700 text-white text-xs font-semibold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  {{translations().tabs.settings}}
+                </div>
+              </div>
+          </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-background-dark">
+          @switch (activeTab()) {
+            @case ('planner') {
+              <div class="flex-1 flex flex-col overflow-hidden">
+                <header class="flex-shrink-0 flex items-center justify-between p-6 border-b border-white/10">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">{{ translations().planner.title }}</h1>
+                        <div class="flex items-center gap-4 mt-2">
+                            <label for="platform" class="text-sm text-gray-400">{{ translations().planner.platformSelectorLabel }}:</label>
+                            <div class="flex items-center gap-2 rounded-lg bg-gray-900 p-1">
+                                @for(platform of platforms; track platform) {
+                                    <button (click)="selectedPlatform.set(platform)"
+                                            [class.bg-primary]="selectedPlatform() === platform"
+                                            [class.text-white]="selectedPlatform() === platform"
+                                            [class.text-gray-300]="selectedPlatform() !== platform"
+                                            class="px-3 py-1 text-sm font-medium rounded-md transition-colors">
+                                        {{ platform }}
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button (click)="openNewPostModal()" class="bg-gray-700 hover:bg-gray-600 text-sm font-semibold py-2 px-4 rounded-md">{{ translations().planner.newPost }}</button>
+                        <div class="flex items-center gap-2 rounded-lg bg-gray-900 p-1">
+                            <button (click)="plannerTab.set('ideas')" class="px-4 py-2 text-sm font-medium rounded-md transition-colors" [class.bg-primary]="plannerTab() === 'ideas'" [class.text-white]="plannerTab() === 'ideas'" [class.text-gray-300]="plannerTab() !== 'ideas'">
+                               {{ translations().planner.ideasTab }}
+                            </button>
+                            <button (click)="plannerTab.set('calendar')" class="px-4 py-2 text-sm font-medium rounded-md transition-colors" [class.bg-primary]="plannerTab() === 'calendar'" [class.text-white]="plannerTab() === 'calendar'" [class.text-gray-300]="plannerTab() !== 'calendar'">
+                               {{ translations().planner.calendarTab }}
+                            </button>
+                        </div>
+                    </div>
+                </header>
+                @switch (plannerTab()) {
+                    @case ('ideas') {
+                        <div class="flex-1 overflow-y-auto p-6 relative">
+                            @if(planningInsights(); as insights) {
+                                <div class="space-y-6">
+                                    <form [formGroup]="planningForm" (change)="fetchPlanningData()" class="p-4 rounded-lg bg-gray-900 border border-white/10">
+                                      <h3 class="text-lg font-semibold text-white">{{ translations().planner.planSettingsTitle }}</h3>
+                                      <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                          <label for="posts-per-week" class="block text-sm font-medium text-gray-300">{{ translations().planner.postsPerWeekLabel }}</label>
+                                          <input type="number" id="posts-per-week" formControlName="postsPerWeek" min="0" max="14" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-2 px-3 text-white focus:border-primary focus:ring-primary">
+                                        </div>
+                                        <div>
+                                          <label for="start-date" class="block text-sm font-medium text-gray-300">{{ translations().planner.startDateLabel }}</label>
+                                          <input type="date" id="start-date" formControlName="startDate" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-2 px-3 text-white focus:border-primary focus:ring-primary">
+                                        </div>
+                                        <div>
+                                          <label for="end-date" class="block text-sm font-medium text-gray-300">{{ translations().planner.endDateLabel }}</label>
+                                          <input type="date" id="end-date" formControlName="endDate" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 py-2 px-3 text-white focus:border-primary focus:ring-primary">
+                                        </div>
+                                      </div>
+                                    </form>
+                                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                        <!-- Trends -->
+                                        <div class="space-y-4 rounded-lg bg-gray-900 p-4 border border-white/10">
+                                            <h3 class="font-semibold text-white">{{ translations().planner.trendsTitle }}</h3>
+                                            @for(trend of insights.trends; track trend.title) {
+                                                <div class="p-3 bg-background-dark rounded-md">
+                                                    <h4 class="font-medium text-primary">{{trend.title}}</h4>
+                                                    <p class="text-sm text-gray-400 mt-1">{{trend.description}}</p>
+                                                </div>
+                                            }
+                                        </div>
+                                        <!-- Special Days -->
+                                        <div class="space-y-4 rounded-lg bg-gray-900 p-4 border border-white/10">
+                                            <h3 class="font-semibold text-white">{{ translations().planner.specialDaysTitle }}</h3>
+                                            @for(day of insights.specialDays; track day.day) {
+                                               <label class="flex items-start gap-3 p-3 bg-background-dark rounded-md cursor-pointer hover:bg-gray-800">
+                                                    <input type="checkbox" [checked]="isSpecialDaySelected(day.day)" (change)="toggleSpecialDay(day.day)" class="mt-1 h-4 w-4 rounded border-gray-600 bg-gray-700 text-primary focus:ring-primary">
+                                                    <div>
+                                                        <h4 class="font-medium text-primary">{{day.day}}</h4>
+                                                        <p class="text-sm text-gray-400 mt-1">{{day.description}}</p>
+                                                    </div>
+                                               </label>
+                                            }
+                                        </div>
+                                        <!-- Campaign Ideas -->
+                                        <div class="space-y-4 rounded-lg bg-gray-900 p-4 border border-white/10">
+                                            <h3 class="font-semibold text-white">{{ translations().planner.campaignIdeasTitle }}</h3>
+                                             @for(idea of insights.campaignIdeas; track idea.title) {
+                                               <label class="flex items-start gap-3 p-3 bg-background-dark rounded-md cursor-pointer hover:bg-gray-800">
+                                                    <input type="checkbox" [checked]="isIdeaSelected(idea)" (change)="toggleCampaignIdea(idea)" class="mt-1 h-4 w-4 rounded border-gray-600 bg-gray-700 text-primary focus:ring-primary">
+                                                    <div>
+                                                        <h4 class="font-medium text-primary">{{idea.title}}</h4>
+                                                        <p class="text-sm text-gray-400 mt-1">{{idea.description}}</p>
+                                                    </div>
+                                               </label>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (selectedCampaignIdeas().length > 0 || selectedSpecialDays().length > 0 || planningForm.get('postsPerWeek')?.value > 0) {
+                                <div class="fixed bottom-10 right-10 z-20">
+                                    <button (click)="generateContentPlan()" class="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-full shadow-lg flex items-center gap-2">
+                                        <span class="material-symbols-outlined">auto_awesome</span>
+                                        {{ translations().planner.createPlanButton }}
+                                    </button>
+                                </div>
+                                }
+                            } @else {
+                                <div class="flex items-center justify-center h-full">
+                                    <app-loading-spinner></app-loading-spinner>
+                                </div>
+                            }
+                        </div>
+                    }
+                    @case ('calendar') {
+                        <div class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_320px] overflow-hidden">
+                            <!-- Calendar -->
+                            <div class="flex flex-col overflow-hidden">
+                                <div class="flex-shrink-0 flex items-center justify-between p-4 border-b border-white/10">
+                                    <button (click)="changeMonth(-1)" class="p-2 rounded-full hover:bg-gray-800"><span class="material-symbols-outlined">chevron_left</span></button>
+                                    <h2 class="text-lg font-semibold">{{ monthName() }} {{ year() }}</h2>
+                                    <button (click)="changeMonth(1)" class="p-2 rounded-full hover:bg-gray-800"><span class="material-symbols-outlined">chevron_right</span></button>
+                                </div>
+                                <div class="flex-1 grid grid-cols-7 grid-rows-6 overflow-hidden">
+                                    @for(day of translations().calendar.daysShort; track day) {
+                                        <div class="text-center font-bold text-sm py-2 border-b border-r border-white/10 text-gray-400">{{day}}</div>
+                                    }
+                                    @for(day of monthDays(); track day.dateObj) {
+                                        <div class="border-b border-r border-white/10 p-2 flex flex-col gap-1 relative overflow-y-auto" [class.bg-gray-900]="day.isCurrentMonth" [class.bg-background-dark]="!day.isCurrentMonth"
+                                            (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event, day.dateObj)">
+                                            <span class="font-medium text-xs" [class.text-white]="day.isCurrentMonth" [class.text-gray-600]="!day.isCurrentMonth">{{day.day}}</span>
+                                            @for(campaign of getCampaignsForDate(day.dateObj); track campaign.title) {
+                                                <div (click)="openEditModal(campaign)" draggable="true" (dragstart)="onDragStart($event, campaign)"
+                                                class="text-xs p-1.5 rounded-md cursor-pointer text-white" [style.background-color]="campaign.color">
+                                                   {{campaign.title}}
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <!-- Unscheduled Posts -->
+                            <div class="flex flex-col border-l border-white/10 bg-gray-900">
+                                <h3 class="p-4 font-semibold text-white border-b border-white/10">{{ translations().planner.unplannedTitle }} ({{unscheduledCampaigns().length}})</h3>
+                                <div class="flex-1 overflow-y-auto p-4 space-y-3" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event, null)">
+                                     @for(campaign of unscheduledCampaigns(); track campaign.title) {
+                                        <div (click)="openEditModal(campaign)" draggable="true" (dragstart)="onDragStart($event, campaign)"
+                                             class="p-3 rounded-lg cursor-grab active:cursor-grabbing" [class.dragging]="draggedCampaign()?.title === campaign.title" [style.background-color]="campaign.color + '30'">
+                                            <p class="font-semibold text-sm" [style.color]="campaign.color">{{campaign.title}}</p>
+                                            <p class="text-xs text-gray-400 mt-1 line-clamp-2">{{campaign.concept}}</p>
+                                        </div>
+                                     }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+              </div>
+            }
+            @case ('reports') {
+              <div class="flex-1 overflow-y-auto p-8">
+                <h1 class="text-3xl font-bold text-white">{{ translations().tabs.reports }}</h1>
+                 <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <div class="rounded-lg bg-gray-900 p-6 border border-white/10">
+                    <p class="text-sm font-medium text-gray-400">{{ translations().reports.totalPosts }}</p>
+                    <p class="mt-2 text-3xl font-bold text-white">{{ totalPostsPlanned() }}</p>
+                  </div>
+                  <div class="rounded-lg bg-gray-900 p-6 border border-white/10">
+                    <p class="text-sm font-medium text-gray-400">{{ translations().reports.scheduled }}</p>
+                    <p class="mt-2 text-3xl font-bold text-white">{{ scheduledPosts() }}</p>
+                  </div>
+                  <div class="rounded-lg bg-gray-900 p-6 border border-white/10">
+                    <p class="text-sm font-medium text-gray-400">{{ translations().reports.unscheduled }}</p>
+                    <p class="mt-2 text-3xl font-bold text-white">{{ totalPostsPlanned() - scheduledPosts() }}</p>
+                  </div>
+                </div>
+                 <div class="mt-8 rounded-lg bg-gray-900 p-6 border border-white/10">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-semibold text-white">{{ translations().reports.competitorAnalysisTitle }}</h2>
+                        <button (click)="runCompetitorAnalysis()" [disabled]="isAnalyzingCompetitors()" class="bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-md disabled:opacity-50">
+                            {{ isAnalyzingCompetitors() ? translations().reports.loadingCompetitors : translations().reports.runAnalysisButton }}
+                        </button>
+                    </div>
+                     @if (isAnalyzingCompetitors()) {
+                        <div class="flex justify-center py-12"><app-loading-spinner></app-loading-spinner></div>
+                     } @else if(competitorAnalysis(); as compAnalysis) {
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2 prose prose-invert max-w-none text-gray-300 [&_h3]:text-white" [innerHTML]="compAnalysis.analysis"></div>
+                            <div>
+                                <h3 class="font-semibold text-white">{{ translations().reports.analysisSourcesTitle }}</h3>
+                                <ul class="mt-2 space-y-2">
+                                    @for(source of compAnalysis.sources; track source.web?.uri) {
+                                      @if(source.web) {
+                                        <li><a [href]="source.web.uri" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline text-sm">{{source.web.title}}</a></li>
+                                      }
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                     } @else {
+                        <p class="mt-4 text-center text-gray-500 py-12">{{ translations().reports.noCompetitorAnalysis }}</p>
+                     }
+                 </div>
+              </div>
+            }
+            @case ('settings') {
+              <div class="flex-1 overflow-y-auto p-8">
+                <h1 class="text-3xl font-bold text-white">{{ translations().tabs.settings }}</h1>
+                 <div class="mt-8 rounded-lg bg-gray-900 p-6 border border-white/10 max-w-md">
+                    <h2 class="font-semibold text-white">Language / Dil</h2>
+                    <p class="text-gray-400 text-sm mt-1">Select your preferred language.</p>
+                    <div class="mt-4 space-y-2">
+                        @for(lang of translationService.supportedLanguages; track lang.code) {
+                            <button (click)="changeLanguage(lang.code)" 
+                                    class="w-full text-left p-3 rounded-md flex items-center gap-3"
+                                    [class.bg-primary/20]="translationService.currentLang() === lang.code"
+                                    [class.hover:bg-white/5]="translationService.currentLang() !== lang.code">
+                                <span>{{ lang.flag }}</span>
+                                <span>{{ lang.name }}</span>
+                            </button>
+                        }
+                    </div>
+                 </div>
+              </div>
+            }
+          }
+        </main>
+      </div>
+    }
+  }
+
+  <!-- Edit Post Modal -->
+  @if (editingCampaign(); as campaign) {
+    <div class="fixed inset-0 bg-black/80 z-40 flex items-center justify-center animate-fade-in p-4">
+      <div class="bg-background-dark rounded-2xl w-full max-w-6xl h-[90vh] flex flex-col border border-white/10">
+        <header class="p-4 flex justify-between items-center border-b border-white/10 flex-shrink-0">
+          <h2 class="text-xl font-bold">{{ translations().modals.editPost.title }}: {{ campaign.title }}</h2>
+          <button (click)="closeEditModal()" class="p-2 rounded-full hover:bg-gray-800">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </header>
+
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+          <!-- Left side: Form -->
+          <div class="overflow-y-auto p-6 space-y-4">
+            <div>
+              <label class="text-sm font-medium text-gray-400">{{ translations().modals.editPost.postTitleLabel }}</label>
+              <input type="text" [(ngModel)]="campaign.title" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700">
+            </div>
+             <div>
+              <label class="text-sm font-medium text-gray-400">{{ translations().modals.newPost.conceptLabel }}</label>
+              <textarea [(ngModel)]="campaign.concept" rows="3" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700"></textarea>
+            </div>
+             <div>
+              <label class="text-sm font-medium text-gray-400">{{ translations().modals.newPost.captionLabel }}</label>
+              <textarea [(ngModel)]="campaign.caption" rows="5" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700"></textarea>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-400">{{ translations().modals.newPost.hashtagsLabel }}</label>
+              <input type="text" [ngModel]="campaign.hashtags?.join(' ')" (ngModelChange)="campaign.hashtags = $event.split(' ')" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700">
+            </div>
+            <div class="grid grid-cols-2 gap-4 pt-4">
+              <div>
+                <h3 class="font-semibold">{{ translations().modals.editPost.adTargeting }}</h3>
+                <div class="prose prose-sm prose-invert mt-2 text-gray-300 max-w-none" [innerHTML]="campaign.adTargeting"></div>
+              </div>
+               <div>
+                <h3 class="font-semibold">{{ translations().modals.editPost.adCreative }}</h3>
+                <div class="prose prose-sm prose-invert mt-2 text-gray-300 max-w-none" [innerHTML]="campaign.adCreative"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Right side: Image Generation -->
+          <div class="overflow-y-auto p-6 bg-gray-900 border-l border-white/10 flex flex-col">
+            <h3 class="font-semibold flex-shrink-0">{{ translations().modals.editPost.visualsTitle }}</h3>
+            
+            <div class="flex-shrink-0 border-b border-gray-700 mt-2">
+              <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                <button (click)="visualsTab.set('image')" [class.border-primary]="visualsTab() === 'image'" [class.text-primary]="visualsTab() === 'image'" [class.border-transparent]="visualsTab() !== 'image'" [class.text-gray-400]="visualsTab() !== 'image'" [class.hover:text-gray-200]="visualsTab() !== 'image'" [class.hover:border-gray-500]="visualsTab() !== 'image'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+                  {{ translations().modals.editPost.imageTab }}
+                </button>
+                <button (click)="visualsTab.set('video')" [class.border-primary]="visualsTab() === 'video'" [class.text-primary]="visualsTab() === 'video'" [class.border-transparent]="visualsTab() !== 'video'" [class.text-gray-400]="visualsTab() !== 'video'" [class.hover:text-gray-200]="visualsTab() !== 'video'" [class.hover:border-gray-500]="visualsTab() !== 'video'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+                  {{ translations().modals.editPost.videoTab }}
+                </button>
+              </nav>
+            </div>
+
+            @if(visualsTab() === 'image') {
+              <div class="mt-4 space-y-4 flex-shrink-0">
+                  <div>
+                    <label class="text-sm font-medium text-gray-400">{{ translations().modals.editPost.imagePromptLabel }}</label>
+                    <textarea [(ngModel)]="imageGenerationPrompt" rows="4" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700"></textarea>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-gray-400">{{ translations().modals.editPost.styleLabel }}</label>
+                      <select [(ngModel)]="selectedImageStyle" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700">
+                        @for(style of translations().imageStyles; track style) { <option [value]="style">{{style}}</option> }
+                      </select>
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-gray-400">{{ translations().modals.editPost.aspectRatioLabel }}</label>
+                       <select [(ngModel)]="selectedAspectRatio" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700">
+                        @for(ratio of aspectRatios; track ratio) { <option [value]="ratio">{{ratio}}</option> }
+                      </select>
+                    </div>
+                  </div>
+                   <button (click)="generateImageForCampaign()" [disabled]="isGeneratingImage()" class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-md disabled:opacity-50 flex items-center justify-center gap-2">
+                      @if(isGeneratingImage()) { <app-loading-spinner></app-loading-spinner> }
+                      <span>{{ translations().modals.editPost.generateImageButton }}</span>
+                   </button>
+              </div>
+              <div class="mt-4 flex-1 overflow-y-auto rounded-lg bg-background-dark p-2">
+                  @if(campaign.generatedImages && campaign.generatedImages.length > 0) {
+                      <div class="grid grid-cols-2 gap-2">
+                          @for(image of campaign.generatedImages; track image.urlString) {
+                              <img [src]="image.url" alt="Generated visual" class="w-full h-auto object-cover rounded-md">
+                          }
+                      </div>
+                  } @else {
+                      <div class="h-full flex items-center justify-center text-gray-500 text-sm">{{ translations().modals.editPost.imagePlaceholder }}</div>
+                  }
+              </div>
+            }
+            @if(visualsTab() === 'video') {
+              <div class="mt-4 flex flex-col flex-1">
+                 @if (campaign.generatedVideoUrl) {
+                  <div class="mb-4">
+                    <video [src]="campaign.generatedVideoUrl" controls class="w-full rounded-lg"></video>
+                  </div>
+                }
+                @if (campaign.isGenerating === 'video') {
+                  <div class="flex flex-col items-center justify-center text-center p-4 rounded-lg bg-background-dark mb-4">
+                      <app-loading-spinner></app-loading-spinner>
+                      <p class="mt-2 text-sm font-semibold text-primary">{{ campaign.generationStatus }}</p>
+                  </div>
+                }
+                <div class="space-y-4">
+                  <div>
+                    <button (click)="generateUgcScriptForCampaign()" [disabled]="campaign.isGeneratingUgcScript" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md disabled:opacity-50 flex items-center justify-center gap-2">
+                       @if(campaign.isGeneratingUgcScript) { <app-loading-spinner></app-loading-spinner> }
+                      <span>{{ translations().modals.editPost.generateScriptButton }}</span>
+                    </button>
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-gray-400">{{ translations().modals.editPost.ugcScriptLabel }}</label>
+                    <textarea [(ngModel)]="campaign.ugcScript" rows="6" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700" [placeholder]="translations().modals.editPost.ugcScriptPlaceholder"></textarea>
+                  </div>
+                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                     <button (click)="generateVideoForCampaign('concept')" [disabled]="campaign.isGenerating === 'video' || !campaign.concept || !campaign.generatedImages?.length" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md disabled:opacity-50 flex items-center justify-center gap-2 text-center">
+                        <span>{{ translations().modals.editPost.generateVideoButtonFromConcept }}</span>
+                     </button>
+                     <button (click)="generateVideoForCampaign('ugc')" [disabled]="campaign.isGenerating === 'video' || !campaign.ugcScript || !campaign.generatedImages?.length" class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-md disabled:opacity-50 flex items-center justify-center gap-2 text-center">
+                        <span>{{ translations().modals.editPost.generateVideoButtonFromScript }}</span>
+                     </button>
+                   </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+        <footer class="p-4 flex justify-end gap-3 border-t border-white/10 flex-shrink-0">
+          <button (click)="closeEditModal()" class="bg-gray-700 hover:bg-gray-600 font-semibold py-2 px-4 rounded-md">{{ translations().common.cancel }}</button>
+          <button (click)="saveEditedCampaign()" class="bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-md">{{ translations().common.save }}</button>
+        </footer>
+      </div>
+    </div>
+  }
+
+  <!-- New Post Modal -->
+  @if(isNewPostModalOpen()) {
+    <div class="fixed inset-0 bg-black/80 z-40 flex items-center justify-center animate-fade-in p-4">
+        <form [formGroup]="newPostForm" (ngSubmit)="saveNewPost()" class="bg-background-dark rounded-2xl w-full max-w-2xl border border-white/10">
+            <header class="p-4 flex justify-between items-center border-b border-white/10">
+                <h2 class="text-xl font-bold">{{ translations().modals.newPost.title }}</h2>
+                <button type="button" (click)="closeNewPostModal()" class="p-2 rounded-full hover:bg-gray-800">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </header>
+            <div class="p-6 space-y-4">
+                 <div>
+                    <label for="newTitle" class="text-sm font-medium text-gray-300">{{ translations().modals.newPost.postTitleLabel }}</label>
+                    <input id="newTitle" formControlName="title" type="text" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700" [placeholder]="translations().modals.newPost.postTitlePlaceholder">
+                </div>
+                <div>
+                    <label for="newConcept" class="text-sm font-medium text-gray-300">{{ translations().modals.newPost.conceptLabel }}</label>
+                    <textarea id="newConcept" formControlName="concept" rows="2" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700" [placeholder]="translations().modals.newPost.conceptPlaceholder"></textarea>
+                </div>
+                <div>
+                    <label for="newCaption" class="text-sm font-medium text-gray-300">{{ translations().modals.newPost.captionLabel }}</label>
+                    <textarea id="newCaption" formControlName="caption" rows="4" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700" [placeholder]="translations().modals.newPost.captionPlaceholder"></textarea>
+                </div>
+                 <div>
+                    <label for="newHashtags" class="text-sm font-medium text-gray-300">{{ translations().modals.newPost.hashtagsLabel }}</label>
+                    <input id="newHashtags" formControlName="hashtags" type="text" class="mt-1 w-full bg-gray-800 rounded-md p-2 border border-gray-700" [placeholder]="translations().modals.newPost.hashtagsPlaceholder">
+                    <p class="text-xs text-gray-500 mt-1">{{ translations().modals.newPost.hashtagsHelper }}</p>
+                </div>
+            </div>
+            <footer class="p-4 flex justify-end gap-3 border-t border-white/10">
+                <button type="button" (click)="closeNewPostModal()" class="bg-gray-700 hover:bg-gray-600 font-semibold py-2 px-4 rounded-md">{{ translations().modals.newPost.closeButton }}</button>
+                <button type="submit" [disabled]="newPostForm.invalid" class="bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-md disabled:opacity-50">{{ translations().modals.newPost.saveButton }}</button>
+            </footer>
+        </form>
+    </div>
+  }
+
+</div>
