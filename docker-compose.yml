@@ -1,0 +1,23 @@
+services:
+  sosyal-medya:
+    build:
+      context: .
+    image: ppg-sosyal-medya:local
+    container_name: ppg-sosyal-medya
+    restart: always
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    networks: [coolify]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
+      - "traefik.http.routers.sosyal-toolbox.rule=Host(`ppg.pmapartner.com`) && PathPrefix(`/toolbox/sosyal-medya`)"
+      - "traefik.http.routers.sosyal-toolbox.entrypoints=https"
+      - "traefik.http.routers.sosyal-toolbox.tls=true"
+      - "traefik.http.routers.sosyal-toolbox.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.sosyal-toolbox.service=sosyal-toolbox"
+      - "traefik.http.services.sosyal-toolbox.loadbalancer.server.port=80"
+
+networks:
+  coolify:
+    external: true
